@@ -22,7 +22,7 @@ class MUCTDataset(Dataset):
         img = Image.open(img_path).convert("RGB")
         img_np = np.array(img)
 
-        raw_landmarks = self.data.iloc[idx, 2:].values.astype("float32")
+        raw_landmarks = self.data.iloc[idx, 3:].values.astype("float32")
         landmarks = raw_landmarks.reshape(-1, 2)
 
         if self.transform:
