@@ -17,7 +17,7 @@ class MUCTDataset(Dataset):
         return len(self.data)
     
     def __getitem__(self, idx):
-        img_name = str(self.data.iloc[idx, 0]) + ".jpg"
+        img_name = str(self.data.iloc[idx, 1]) + ".jpg"
         img_path = self.img_dir / img_name
         img = Image.open(img_path).convert("RGB")
         img_np = np.array(img)
