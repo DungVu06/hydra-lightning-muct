@@ -27,7 +27,7 @@ class MUCTDataset(Dataset):
 
         if self.transform:
             transformed = self.transform(image=img_np, keypoints=landmarks)
-            img = transformed("image")
+            img_tensor = transformed["image"]
             landmarks = np.array(transformed["keypoints"]).flatten()
 
-        return img, torch.tensor(landmarks, dtype=torch.float32)
+        return img_tensor, torch.tensor(landmarks, dtype=torch.float32)
