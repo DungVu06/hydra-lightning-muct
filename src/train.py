@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Optional, Tuple
 
+import torch
+import functools
 import hydra
 import lightning as L
 import rootutils
@@ -7,6 +9,8 @@ import torch
 from lightning import Callback, LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
+
+torch.serialization.add_safe_globals([functools.partial])
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # ------------------------------------------------------------------------------------ #
