@@ -62,7 +62,7 @@ class MUCTLitModule(LightningModule):
         self.net = net
 
         # loss function
-        self.criterion = torch.nn.MSELoss()
+        self.criterion = torch.nn.SmoothL1Loss(beta=1.0)
 
         # for averaging loss across batches
         self.train_loss = MeanMetric()
