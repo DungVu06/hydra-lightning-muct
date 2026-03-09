@@ -34,7 +34,6 @@ class MUCTDataModule(LightningDataModule):
         # data transformations
         self.transforms = A.Compose([
             A.Resize(height=224, width=224),
-            A.HorizontalFlip(p=0.5),         
             A.RandomBrightnessContrast(p=0.2),
             A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
             ToTensorV2(),
