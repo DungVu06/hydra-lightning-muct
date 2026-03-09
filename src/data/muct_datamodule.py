@@ -35,12 +35,12 @@ class MUCTDataModule(LightningDataModule):
         self.transforms = A.Compose([
             A.Resize(height=224, width=224),
             A.RandomBrightnessContrast(p=0.5),
-            A.ColorJitter(blur_limit=(3, 5), p=0.2),
+            A.ColorJitter(p=0.2),
             A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=15, border_mode=0, p=0.5),
             A.GaussNoise(p=0.2),
             A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
             ToTensorV2(),
-        ], keypoint_params=A.KeypointParams(format="xy"))
+        ], keypoint_params=A.KeypointParams(format="xy", remove_invisible=False))
 
         self.data_dir = Path(self.hparams.data_dir)
         self.data_train: Optional[Dataset] = None
