@@ -7,7 +7,7 @@ import numpy as np
 from lightning import LightningDataModule
 from torch.utils.data import ConcatDataset, DataLoader, Dataset, random_split
 from albumentations.pytorch import ToTensorV2
-from src.data.muct_dataset import MUCTDataset
+from src.data.components.muct_dataset import MUCTDataset
 from pathlib import Path
 
 class MUCTDataModule(LightningDataModule):

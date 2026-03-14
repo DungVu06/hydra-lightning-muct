@@ -4,42 +4,10 @@ import torch
 from lightning import LightningModule
 from torchmetrics import MinMetric, MeanMetric
 
-from src.data.muct_datamodule import MUCTDataModule
-from src.data.components.muct_dataset import MUCTDataset
+from src.data.wflw_datamodule import WFLWDataModule
+from src.data.components.wflw_dataset import WFLWDataset
 
-class MUCTLitModule(LightningModule):
-    """Example of a `LightningModule` for MUCT classification.
-
-    A `LightningModule` implements 8 key methods:
-
-    ```python
-    def __init__(self):
-    # Define initialization code here.
-
-    def setup(self, stage):
-    # Things to setup before each stage, 'fit', 'validate', 'test', 'predict'.
-    # This hook is called on every process when using DDP.
-
-    def training_step(self, batch, batch_idx):
-    # The complete training step.
-
-    def validation_step(self, batch, batch_idx):
-    # The complete validation step.
-
-    def test_step(self, batch, batch_idx):
-    # The complete test step.
-
-    def predict_step(self, batch, batch_idx):
-    # The complete predict step.
-
-    def configure_optimizers(self):
-    # Define and configure optimizers and LR schedulers.
-    ```
-
-    Docs:
-        https://lightning.ai/docs/pytorch/latest/common/lightning_module.html
-    """
-
+class WFLWLitModule(LightningModule):
     def __init__(
         self,
         net: torch.nn.Module,
@@ -47,12 +15,6 @@ class MUCTLitModule(LightningModule):
         scheduler: torch.optim.lr_scheduler,
         compile: bool,
     ) -> None:
-        """Initialize a `MUCTLitModule`.
-
-        :param net: The model to train.
-        :param optimizer: The optimizer to use for training.
-        :param scheduler: The learning rate scheduler to use for training.
-        """
         super().__init__()
 
         # this line allows to access init params with 'self.hparams' attribute
@@ -73,11 +35,6 @@ class MUCTLitModule(LightningModule):
         self.val_loss_best = MinMetric()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Perform a forward pass through the model `self.net`.
-
-        :param x: A tensor of images.
-        :return: A tensor of logits.
-        """
         return self.net(x)
 
     def on_train_start(self) -> None:
@@ -90,15 +47,6 @@ class MUCTLitModule(LightningModule):
     def model_step(
         self, batch: Tuple[torch.Tensor, torch.Tensor]
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        """Perform a single model step on a batch of data.
-
-        :param batch: A batch of data (a tuple) containing the input tensor of images and target labels.
-
-        :return: A tuple containing (in order):
-            - A tensor of losses.
-            - A tensor of predictions.
-            - A tensor of target labels.
-        """
         x, y = batch
         preds = self.forward(x)
         loss = self.criterion(preds, y)
@@ -108,13 +56,6 @@ class MUCTLitModule(LightningModule):
     def training_step(
         self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int
     ) -> torch.Tensor:
-        """Perform a single training step on a batch of data from the training set.
-
-        :param batch: A batch of data (a tuple) containing the input tensor of images and target
-            labels.
-        :param batch_idx: The index of the current batch.
-        :return: A tensor of losses between model predictions and targets.
-        """
         loss, preds, targets = self.model_step(batch)
 
         # update and log metrics
@@ -129,18 +70,12 @@ class MUCTLitModule(LightningModule):
         pass
 
     def validation_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> None:
-        """Perform a single validation step on a batch of data from the validation set.
-
-        :param batch: A batch of data (a tuple) containing the input tensor of images and target
-            labels.
-        :param batch_idx: The index of the current batch.
-        """
         loss, preds, targets = self.model_step(batch)
-        p = preds.view(-1, 76, 2)
-        t = targets.view(-1, 76, 2)
+        p = preds.view(-1, 98, 2)
+        t = targets.view(-1, 98, 2)
 
         dist = torch.sqrt(torch.sum((p - t) ** 2, dim=-1))
-        d = torch.norm(t[:, 24, :] - t[:, 44, :], dim=-1, keepdim=True)
+        d = torch.norm(t[:, 96, :] - t[:, 97, :], dim=-1, keepdim=True)
 
         batch_nme = torch.mean(torch.mean(dist / d), dim=-1)
 
@@ -158,12 +93,6 @@ class MUCTLitModule(LightningModule):
         self.log("val/loss_best", self.val_loss_best.compute(), sync_dist=True, prog_bar=True)
 
     def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> None:
-        """Perform a single test step on a batch of data from the test set.
-
-        :param batch: A batch of data (a tuple) containing the input tensor of images and target
-            labels.
-        :param batch_idx: The index of the current batch.
-        """
         loss, preds, targets = self.model_step(batch)
 
         # update and log metrics
@@ -175,26 +104,10 @@ class MUCTLitModule(LightningModule):
         pass
 
     def setup(self, stage: str) -> None:
-        """Lightning hook that is called at the beginning of fit (train + validate), validate,
-        test, or predict.
-
-        This is a good hook when you need to build models dynamically or adjust something about
-        them. This hook is called on every process when using DDP.
-
-        :param stage: Either `"fit"`, `"validate"`, `"test"`, or `"predict"`.
-        """
         if self.hparams.compile and stage == "fit":
             self.net = torch.compile(self.net)
 
     def configure_optimizers(self) -> Dict[str, Any]:
-        """Choose what optimizers and learning-rate schedulers to use in your optimization.
-        Normally you'd need one. But in the case of GANs or similar you might have multiple.
-
-        Examples:
-            https://lightning.ai/docs/pytorch/latest/common/lightning_module.html#configure-optimizers
-
-        :return: A dict containing the configured optimizers and learning-rate schedulers to be used for training.
-        """
         optimizer = self.hparams.optimizer(params=self.trainer.model.parameters())
         if self.hparams.scheduler is not None:
             scheduler = self.hparams.scheduler(optimizer=optimizer)
@@ -211,4 +124,4 @@ class MUCTLitModule(LightningModule):
 
 
 if __name__ == "__main__":
-    _ = MUCTLitModule(None, None, None, None)
+    _ = WFLWLitModule(None, None, None, None)

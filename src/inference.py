@@ -14,7 +14,7 @@ from src.models.muct_module import MUCTLitModule
 
 # api = wandb.Api()
 
-# artifact = api.artifact("vuhoangdung3103_yorha/face-landmark-muct/model-0sdv1150:v0")
+# artifact = api.artifact("vuhoangdung3103_yorha/face-landmark-muct/model-biuv9tks:v0")
 
 # save_dir = "logs/train"
 # artifact_dir = artifact.download(root=save_dir)
@@ -59,7 +59,7 @@ def predict_and_draw(image_path, checkpoint_path):
     plt.axis('off')
     plt.show()
 
-TEST_IMAGE_PATH = "test_img_3.png" 
+TEST_IMAGE_PATH = "test_img_10.png" 
 CKPT_PATH = "logs/train/model.ckpt"
 
 predict_and_draw(TEST_IMAGE_PATH, CKPT_PATH)
