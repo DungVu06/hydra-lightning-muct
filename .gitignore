@@ -153,12 +153,12 @@ configs/local/default.yaml
 # Aim logging   
 .aim
 
-data
-data/inference_data
-data/wflw
-data/wflw/trainval
-data/wflw/test
-data/wflw/WFLW_Cropped_256_Test/*
-data/wflw/WFLW_Cropped_256_Train/*
-!data/wflw/WFLW_Cropped_256_Test/.gitkeep
-!data/wflw/WFLW_Cropped_256_Train/.gitkeep
+/data/*
+/data/inference_data
+!data/wflw
+/data/wflw/trainval
+/data/wflw/test
+/data/wflw/trainval/images/*
+/data/wflw/test/images/*
+!data/wflw/trainval/.gitkeep
+!data/wflw/test/.gitkeep

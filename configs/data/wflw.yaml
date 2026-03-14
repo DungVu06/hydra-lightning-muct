@@ -1,0 +1,5 @@
+_target_: src.data.wflw_datamodule.WFLWDataModule
+data_dir: ${paths.data_dir}/wflw/
+batch_size: 64
+num_workers: 4
+pin_memory: True
