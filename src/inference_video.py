@@ -12,19 +12,19 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
 from src.models.components.simple_resnet import FaceLandmarkModel
-from src.models.muct_module import MUCTLitModule
+from src.models.wflw_module import WFLWLitModule
 
 def live_cam_inference(checkpoint_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Loading model on {device}...")
 
     my_net = FaceLandmarkModel()
-    model = MUCTLitModule.load_from_checkpoint(checkpoint_path, net=my_net)
+    model = WFLWLitModule.load_from_checkpoint(checkpoint_path, net=my_net)
     model.to(device)
     model.eval()
 
     transform = A.Compose([
-        A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
         ToTensorV2()
     ])
 
@@ -57,7 +57,7 @@ def live_cam_inference(checkpoint_path):
         crop_bgr = frame[y1:y2, x1:x2]
         crop_rgb = cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2RGB)
         
-        model_image = cv2.resize(crop_rgb, (224, 224))
+        model_image = cv2.resize(crop_rgb, (256, 256))
         input_tensor = transform(image=model_image)["image"].unsqueeze(0).to(device)
 
         with torch.no_grad():
@@ -65,14 +65,17 @@ def live_cam_inference(checkpoint_path):
 
         landmarks = outputs.cpu().numpy().squeeze().reshape(-1, 2)
 
+       # Model trả về tỷ lệ [0, 1], ta nhân thẳng với box_size (300) để bung ra đúng kích thước khung hình thật
         landmarks_real = np.zeros_like(landmarks)
-        landmarks_real[:, 0] = landmarks[:, 0] * (box_size / 224.0)
-        landmarks_real[:, 1] = landmarks[:, 1] * (box_size / 224.0)
+        landmarks_real[:, 0] = landmarks[:, 0] * box_size
+        landmarks_real[:, 1] = landmarks[:, 1] * box_size
 
         for (lx, ly) in landmarks_real:
+            # Cộng thêm x1, y1 để dịch chuyển điểm về đúng vị trí trên toàn màn hình webcam
             real_x = int(lx) + x1
             real_y = int(ly) + y1
             
+            # Vẽ điểm màu Hot Pink siêu cute!
             cv2.circle(frame, (real_x, real_y), 2, (180, 105, 255), -1)
 
         cv2.imshow("Face Landmarks Live Cam", frame)
@@ -85,5 +88,5 @@ def live_cam_inference(checkpoint_path):
 
 
 if __name__ == "__main__":
-    CKPT_PATH = "logs/train/model.ckpt"
+    CKPT_PATH = "logs/train/wflw_v0/model.ckpt"
     live_cam_inference(CKPT_PATH)

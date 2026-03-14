@@ -33,6 +33,8 @@ class WFLWDataModule(LightningDataModule):
 
         # data transformations
         self.train_transforms = A.Compose([
+            A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.3, rotate_limit=30, p=0.7),
+            A.RandomBrightnessContrast(p=0.5),
             A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
             ToTensorV2(),
         ], keypoint_params=A.KeypointParams(format="xy", remove_invisible=False))
