@@ -34,7 +34,13 @@ class WFLWDataModule(LightningDataModule):
         # data transformations
         self.train_transforms = A.Compose([
             A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.3, rotate_limit=30, p=0.7),
-            A.RandomBrightnessContrast(p=0.5),
+            A.OneOf([
+                A.MotionBlur(blur_limit=5, p=0.5),
+                A.GaussianBlur(blur_limit=5, p=0.5),
+                A.GaussNoise(var_limit=(10.0, 50.0), p=0.5),
+            ], p=0.4),
+            A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2,p=0.5),
+            A.CoarseDropout(max_holes=2, max_height=40, max_width=40, min_holes=1, min_height=10, min_width=10, fill_value=0, p=0.3),
             A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
             ToTensorV2(),
         ], keypoint_params=A.KeypointParams(format="xy", remove_invisible=False))

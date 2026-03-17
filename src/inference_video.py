@@ -90,3 +90,4 @@ def live_cam_inference(checkpoint_path):
 if __name__ == "__main__":
     CKPT_PATH = "logs/train/wflw_v0/model.ckpt"
     live_cam_inference(CKPT_PATH)
+# 
