@@ -14,9 +14,9 @@ from src.models.wflw_module import WFLWLitModule
 
 api = wandb.Api()
 
-artifact = api.artifact("vuhoangdung3103_yorha/face-landmark-muct/model-imblybyl:v0")
+artifact = api.artifact("vuhoangdung3103_yorha/face-landmark-muct/model-8flu2ove:v0")
 
-save_dir = "logs/train/wflw_v1"
+save_dir = "logs/train/wflw_v2"
 artifact_dir = artifact.download(root=save_dir)
 
 # torch.serialization.add_safe_globals([
