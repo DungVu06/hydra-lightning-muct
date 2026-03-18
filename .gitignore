@@ -162,3 +162,5 @@ configs/local/default.yaml
 /data/wflw/test/images/*
 !data/wflw/trainval/.gitkeep
 !data/wflw/test/.gitkeep
+
+kaggle_training
